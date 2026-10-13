@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background_oled">#FF000000</color>
+    <color name="black">#FF000000</color>
+    <color name="primary_night">#FF7C4DFF</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="action_pause">Pausar</string>
+    <string name="action_resume">Reanudar</string>
+    <string name="action_stop">Detener</string>
+    <string name="app_name">SomnoLog</string>
+    <string name="notification_channel_description">Notificación activa mientras SomnoLog monitorea eventos de audio durante la noche</string>
+    <string name="notification_channel_name">Monitoreo de Audio Nocturno</string>
+    <string name="service_monitoring_text">Monitoreando audio nocturno...</string>
+    <string name="service_monitoring_title">SomnoLog Activo</string>
+    <string name="service_recording_text">¡Grabando evento de audio!</string>
+    <style name="Theme.SomnoLog" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/background_oled</item>
+        <item name="android:navigationBarColor">@color/background_oled</item>
+        <item name="android:windowBackground">@color/background_oled</item>
+    </style>
+</resources>

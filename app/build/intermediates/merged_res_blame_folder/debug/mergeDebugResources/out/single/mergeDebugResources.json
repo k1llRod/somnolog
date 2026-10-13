@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.antigravity.somnolog.app-debug-54:/drawable_ic_notification.xml.flat",
+        "source": "com.antigravity.somnolog.app-main-56:/drawable/ic_notification.xml"
+    },
+    {
+        "merged": "com.antigravity.somnolog.app-debug-54:/drawable_ic_launcher.xml.flat",
+        "source": "com.antigravity.somnolog.app-main-56:/drawable/ic_launcher.xml"
+    }
+]

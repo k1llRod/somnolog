@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SomnoLog - Simulador Web de Interfaz</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            oledBlack: '#000000',
+            darkSurface: '#0D0E15',
+            darkSurfaceVariant: '#161824',
+            darkCardBorder: '#262838',
+            purplePrimary: '#8C65FF',
+            purpleDark: '#5E35B1',
+            cyanAccent: '#00E5FF',
+            greenSafe: '#00E676',
+            amberWarning: '#FFB300',
+            redRecording: '#FF5252',
+            textPrimary: '#F2F3F8',
+            textSecondary: '#9E9FA9',
+            textTertiary: '#6B6D7A',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Custom range slider styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]:focus {
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #00E5FF;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+      border: 3px solid #0D0E15;
+      margin-top: -8px;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8px;
+      cursor: pointer;
+      background: #161824;
+      border-radius: 4px;
+      border: 1px solid #262838;
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #262838;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8C65FF;
+    }
+
+    .pulse-glow {
+      animation: pulseGlow 1.8s infinite;
+    }
+    @keyframes pulseGlow {
+      0% { opacity: 0.4; transform: scale(0.98); }
+      50% { opacity: 0.9; transform: scale(1.02); }
+      100% { opacity: 0.4; transform: scale(0.98); }
+    }
+  </style>
+</head>
+<body class="bg-neutral-950 text-textPrimary min-h-screen flex flex-col items-center justify-start p-2 sm:p-6">
+
+  <!-- Control Header (Para el visor web) -->
+  <header class="w-full max-w-md mb-4 flex items-center justify-between px-3 py-2 bg-darkSurfaceVariant/80 border border-darkCardBorder rounded-2xl backdrop-blur text-xs">
+    <div class="flex items-center space-x-2">
+      <span class="inline-block w-2.5 h-2.5 rounded-full bg-greenSafe animate-ping"></span>
+      <span class="font-semibold text-textPrimary">SomnoLog Web Preview</span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button id="toggle-mic-mode" class="px-2.5 py-1 rounded-lg bg-darkSurface border border-darkCardBorder text-textSecondary hover:text-cyanAccent transition flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 02-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+        <span id="mic-mode-label">Simulador</span>
+      </button>
+      <button id="reset-data-btn" title="Reiniciar datos demo" class="p-1 rounded-lg bg-darkSurface border border-darkCardBorder text-textSecondary hover:text-textPrimary transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Device Frame Container -->
+  <main class="relative w-full max-w-[412px] h-[860px] max-h-[92vh] bg-oledBlack border-4 border-[#222533] rounded-[42px] shadow-2xl overflow-hidden flex flex-col">
+    
+    <!-- Android Status Bar Mock -->
+    <div class="w-full h-8 pt-2 px-6 flex justify-between items-center text-xs text-textSecondary font-medium select-none z-20">
+      <span id="clock-display">03:14</span>
+      <div class="flex items-center space-x-2">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A16.88 16.88 0 0012 4z"/></svg>
+        <div class="w-5 h-2.5 border border-textSecondary rounded-sm p-0.5 flex items-center">
+          <div class="w-full h-full bg-textSecondary rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREENS WRAPPER -->
+    <div id="screens-container" class="relative flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
+      
+      <!-- ============================================== -->
+      <!-- SCREEN 1: DASHBOARD                            -->
+      <!-- ============================================== -->
+      <section id="screen-dashboard" class="flex-1 flex flex-col px-5 pb-8 pt-3 transition-opacity duration-300">
+        
+        <!-- Top App Bar -->
+        <div class="flex items-center justify-between w-full mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-darkSurfaceVariant border border-darkCardBorder flex items-center justify-center text-purplePrimary shadow-inner">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.3 2a10 10 0 0 0-1.9 20 10 10 0 0 0 8.6-4.9 1 1 0 0 0-1-1.5 8 8 0 1 1-7.2-12.6 1 1 0 0 0 1.5-1z"/></svg>
+            </div>
+            <div>
+              <h1 class="text-[22px] font-bold tracking-tight text-textPrimary leading-none">SomnoLog</h1>
+              <p class="text-xs text-textSecondary mt-1">Registro Nocturno Pasivo</p>
+            </div>
+          </div>
+          <button id="btn-goto-history" class="px-4 py-1.5 rounded-xl border border-darkCardBorder text-cyanAccent text-sm font-semibold hover:bg-darkSurfaceVariant transition active:scale-95">
+            Historial
+          </button>
+        </div>
+
+        <!-- Real-time OLED Sound Level Visualizer Gauge -->
+        <div class="relative w-full flex flex-col items-center justify-center my-1">
+          <div class="relative w-[240px] h-[240px]">
+            <canvas id="gauge-canvas" width="240" height="240" class="w-[240px] h-[240px]"></canvas>
+            
+            <!-- Central Numerical Readout -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <div class="flex items-baseline space-x-1">
+                <span id="display-db" class="text-5xl font-extrabold tracking-tight text-textPrimary font-mono-num">38.0</span>
+              </div>
+              <span class="text-xs font-semibold text-textSecondary tracking-wider mt-1">dB SPL</span>
+              <div id="status-badge" class="mt-2 text-xs font-bold uppercase tracking-widest text-[#8C65FF] px-2 py-0.5 rounded-full">
+                INACTIVO
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Night Metrics Cards -->
+        <div class="grid grid-cols-3 gap-2.5 my-5">
+          <!-- Card 1: Ruido Base -->
+          <div class="bg-darkSurface border border-darkCardBorder rounded-2xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-textSecondary font-medium">Ruido Base</span>
+            <div class="my-1.5">
+              <span id="card-baseline-db" class="text-xl font-bold text-textPrimary font-mono-num">38 dB</span>
+            </div>
+            <span class="text-[10px] text-textTertiary">Ambiente</span>
+          </div>
+
+          <!-- Card 2: Umbral Disparo -->
+          <div class="bg-darkSurface border border-darkCardBorder rounded-2xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-textSecondary font-medium">Umbral Disparo</span>
+            <div class="my-1.5">
+              <span id="card-threshold-db" class="text-xl font-bold text-amberWarning font-mono-num">50 dB</span>
+            </div>
+            <span id="card-threshold-delta" class="text-[10px] text-amberWarning/80 font-medium">+12 dB</span>
+          </div>
+
+          <!-- Card 3: Clips Noche -->
+          <div class="bg-darkSurface border border-darkCardBorder rounded-2xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-textSecondary font-medium">Clips Noche</span>
+            <div class="my-1.5">
+              <span id="card-clips-count" class="text-xl font-bold text-greenSafe font-mono-num">0</span>
+            </div>
+            <span id="card-clips-peak" class="text-[10px] text-textTertiary truncate">0 grabados</span>
+          </div>
+        </div>
+
+        <!-- Calibration & Sensitivity Section (Visible when IDLE) -->
+        <div id="section-calibration" class="bg-darkSurface border border-darkCardBorder rounded-2xl p-4 mb-5 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <svg class="w-4 h-4 text-purplePrimary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              <span class="text-sm font-semibold text-textPrimary">Sensibilidad de Disparo</span>
+            </div>
+            <span id="slider-delta-value" class="text-sm font-bold text-cyanAccent font-mono-num">+12 dB</span>
+          </div>
+
+          <!-- Slider -->
+          <div class="py-1">
+            <input id="slider-threshold" type="range" min="5" max="25" step="1" value="12" class="w-full">
+            <div class="flex justify-between text-[11px] text-textSecondary mt-1.5">
+              <span>Más sensible (+5 dB)</span>
+              <span>Menos sensible (+25 dB)</span>
+            </div>
+          </div>
+
+          <!-- Calibration Button & Progress -->
+          <div class="mt-4">
+            <button id="btn-calibrate" class="w-full py-2.5 px-4 rounded-xl bg-darkSurfaceVariant border border-darkCardBorder hover:border-purplePrimary/50 text-textPrimary text-xs font-semibold flex items-center justify-center space-x-2 transition active:scale-98">
+              <svg class="w-4 h-4 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 02-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+              <span id="btn-calibrate-label">Calibrar Ruido Ambiente (3s)</span>
+            </button>
+
+            <!-- Calibration Progress Bar (Hidden by default) -->
+            <div id="calibration-progress-container" class="hidden mt-3">
+              <div class="flex justify-between text-xs text-cyanAccent mb-1">
+                <span>Midiendo silencio del dormitorio...</span>
+                <span id="calibration-percent">0%</span>
+              </div>
+              <div class="w-full bg-darkSurfaceVariant rounded-full h-1.5 overflow-hidden">
+                <div id="calibration-progress-bar" class="bg-cyanAccent h-1.5 rounded-full transition-all duration-100" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div class="mt-auto pt-2">
+          <!-- Button State: IDLE -->
+          <button id="btn-start-monitoring" class="w-full py-4 rounded-2xl bg-purplePrimary hover:bg-purpleDark text-white font-bold text-sm tracking-wide flex items-center justify-center space-x-2 shadow-lg shadow-purplePrimary/20 transition active:scale-98">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span>INICIAR MONITOREO NOCTURNO</span>
+          </button>
+
+          <!-- Button State: ACTIVE (Hidden initially) -->
+          <div id="active-controls" class="hidden grid-cols-2 gap-3 w-full">
+            <button id="btn-pause-monitoring" class="py-3.5 rounded-2xl bg-darkSurface border border-amberWarning text-amberWarning font-bold text-sm flex items-center justify-center space-x-2 active:scale-98">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              <span id="btn-pause-label">Pausar</span>
+            </button>
+            <button id="btn-stop-monitoring" class="py-3.5 rounded-2xl bg-redRecording hover:bg-red-600 text-white font-bold text-sm flex items-center justify-center space-x-2 shadow-lg shadow-redRecording/20 active:scale-98">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+              <span>Detener</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================== -->
+      <!-- SCREEN 2: HISTORY                              -->
+      <!-- ============================================== -->
+      <section id="screen-history" class="hidden flex-1 flex flex-col px-5 pb-8 pt-3 transition-opacity duration-300">
+        
+        <!-- History Top Bar -->
+        <div class="flex items-center space-x-3 w-full mb-5">
+          <button id="btn-back-from-history" class="p-2 rounded-xl text-textSecondary hover:text-textPrimary hover:bg-darkSurfaceVariant transition">
+            <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <h2 id="history-screen-title" class="text-xl font-bold text-textPrimary">Historial de Noches</h2>
+        </div>
+
+        <!-- Sessions List View -->
+        <div id="sessions-view" class="flex-1 flex flex-col space-y-3 overflow-y-auto pr-1">
+          <!-- Session Cards injected via JS -->
+        </div>
+
+        <!-- Single Session Clips View (Drilldown) -->
+        <div id="clips-view" class="hidden flex-1 flex flex-col space-y-3 overflow-y-auto pr-1">
+          <div id="selected-session-info" class="p-3 bg-darkSurfaceVariant/60 border border-darkCardBorder rounded-2xl text-xs flex justify-between items-center text-textSecondary">
+            <span id="clips-session-date">Jueves, 8 de octubre</span>
+            <span id="clips-session-summary" class="text-cyanAccent font-medium">3 grabaciones</span>
+          </div>
+          <div id="clips-list" class="flex flex-col space-y-2.5 mt-2">
+            <!-- Audio Clip Cards injected via JS -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL / BOTTOM SHEET: AUDIO CLIP PLAYER        -->
+    <!-- ============================================== -->
+    <div id="player-sheet" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end transition-opacity">
+      <div id="sheet-content" class="w-full bg-darkSurface border-t border-darkCardBorder rounded-t-[32px] p-5 pt-4 flex flex-col transform transition-transform duration-300 translate-y-full shadow-2xl">
+        
+        <!-- Sheet Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyanAccent animate-pulse"></span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-textSecondary">Reproductor SomnoLog</span>
+          </div>
+          <button id="btn-close-sheet" class="p-1 rounded-full text-textSecondary hover:text-textPrimary bg-darkSurfaceVariant">
+            <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Clip Details & Peak Badge -->
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 id="sheet-clip-title" class="text-lg font-bold text-textPrimary leading-tight">Ronquido / Sonido</h3>
+            <p id="sheet-clip-time" class="text-xs text-textSecondary mt-0.5">03:42:15 AM • Duración: 4.8s</p>
+          </div>
+          <div class="bg-darkSurfaceVariant border border-darkCardBorder px-3 py-1 rounded-xl flex items-center space-x-1">
+            <span class="text-[10px] text-textSecondary font-medium">PICO</span>
+            <span id="sheet-clip-peak" class="text-sm font-bold text-amberWarning font-mono-num">68 dB</span>
+          </div>
+        </div>
+
+        <!-- Simulated Waveform Visualizer -->
+        <div id="waveform-container" class="w-full h-16 bg-darkSurfaceVariant/50 rounded-2xl border border-darkCardBorder p-2.5 flex items-center justify-between gap-1 overflow-hidden relative mb-3">
+          <!-- 40 Waveform Bars injected via JS -->
+        </div>
+
+        <!-- Scrubber Progress Slider -->
+        <div class="mb-4">
+          <input id="sheet-progress-slider" type="range" min="0" max="100" value="0" class="w-full">
+          <div class="flex justify-between text-[11px] text-textSecondary mt-1 font-mono-num">
+            <span id="sheet-time-current">0:00.0</span>
+            <span id="sheet-time-total">0:04.8</span>
+          </div>
+        </div>
+
+        <!-- Playback Controls -->
+        <div class="flex items-center justify-between pt-1">
+          <!-- Speed Toggle Button -->
+          <button id="btn-speed-toggle" class="px-2.5 py-1.5 rounded-xl bg-darkSurfaceVariant border border-darkCardBorder text-xs font-bold text-cyanAccent hover:bg-darkSurface transition">
+            1.0x
+          </button>
+
+          <!-- Rewind, Play/Pause, Forward -->
+          <div class="flex items-center space-x-3">
+            <button id="btn-player-rewind" class="p-2 text-textSecondary hover:text-textPrimary transition">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+            </button>
+            <button id="btn-player-playpause" class="w-12 h-12 rounded-full bg-purplePrimary hover:bg-purpleDark text-white flex items-center justify-center shadow-lg shadow-purplePrimary/30 transition active:scale-95">
+              <svg id="icon-play" class="w-6 h-6 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg id="icon-pause" class="w-6 h-6 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button id="btn-player-forward" class="p-2 text-textSecondary hover:text-textPrimary transition">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+            </button>
+          </div>
+
+          <!-- Delete Clip -->
+          <button id="btn-delete-clip" class="p-2 text-textSecondary hover:text-redRecording transition">
+            <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Android Gesture Navigation Bar Mock -->
+    <div class="w-full h-4 pb-2 flex justify-center items-center pointer-events-none select-none">
+      <div class="w-32 h-1 bg-textSecondary/40 rounded-full"></div>
+    </div>
+  </main>
+
+  <!-- Footnote -->
+  <footer class="mt-4 text-center text-xs text-textTertiary">
+    SomnoLog Android UI • Replicado fielmente en Web (Jetpack Compose Layout & Colors)
+  </footer>
+
+
+  <!-- ============================================== -->
+  <!-- APPLICATION LOGIC & VISUALIZER SCRIPT          -->
+  <!-- ============================================== -->
+  <script>
+    // App State
+    const AppState = {
+      isMonitoring: false,
+      isPaused: false,
+      isCalibrating: false,
+      useRealMic: false,
+      currentDb: 38.0,
+      baselineDb: 38.0,
+      thresholdDelta: 12.0,
+      sessionClipsCount: 0,
+      lastPeakDb: null,
+      calibrationProgress: 0,
+      currentScreen: 'DASHBOARD', // 'DASHBOARD' | 'HISTORY'
+      selectedSessionId: null,
+      sessions: [
+        {
+          id: 1,
+          dateFormatted: 'Jueves, 8 de octubre',
+          timeRange: '02:30 - 07:45',
+          duration: '5h 15m',
+          baselineDb: 36,
+          thresholdDb: 48,
+          clipsCount: 3,
+          clips: [
+            { id: 101, title: 'Ronquido Fuerte', time: '03:14:22 AM', peakDb: 64.5, durationSec: 4.8 },
+            { id: 102, title: 'Movimiento / Susurro', time: '04:22:10 AM', peakDb: 53.0, durationSec: 3.2 },
+            { id: 103, title: 'Sonido Respiratorio', time: '06:05:44 AM', peakDb: 58.2, durationSec: 5.1 }
+          ]
+        },
+        {
+          id: 2,
+          dateFormatted: 'Miércoles, 7 de octubre',
+          timeRange: '23:40 - 06:50',
+          duration: '7h 10m',
+          baselineDb: 34,
+          thresholdDb: 46,
+          clipsCount: 5,
+          clips: [
+            { id: 201, title: 'Habla en sueños', time: '01:12:05 AM', peakDb: 68.0, durationSec: 6.2 },
+            { id: 202, title: 'Ronquido Ligero', time: '02:40:19 AM', peakDb: 51.5, durationSec: 3.9 },
+            { id: 203, title: 'Ruido Ambiental', time: '03:15:30 AM', peakDb: 56.0, durationSec: 4.0 },
+            { id: 204, title: 'Ronquido', time: '04:50:12 AM', peakDb: 61.0, durationSec: 5.5 },
+            { id: 205, title: 'Tos nocturna', time: '05:32:00 AM', peakDb: 66.8, durationSec: 3.4 }
+          ]
+        }
+      ]
+    };
+
+    // Audio Simulation & AudioContext variables
+    let audioContext = null;
+    let analyserNode = null;
+    let micStream = null;
+    let animFrameId = null;
+    let simInterval = null;
+    let calibrationInterval = null;
+
+    // Canvas references
+    const canvas = document.getElementById('gauge-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // DOM Elements
+    const displayDb = document.getElementById('display-db');
+    const statusBadge = document.getElementById('status-badge');
+    const cardBaselineDb = document.getElementById('card-baseline-db');
+    const cardThresholdDb = document.getElementById('card-threshold-db');
+    const cardThresholdDelta = document.getElementById('card-threshold-delta');
+    const cardClipsCount = document.getElementById('card-clips-count');
+    const cardClipsPeak = document.getElementById('card-clips-peak');
+    const sliderThreshold = document.getElementById('slider-threshold');
+    const sliderDeltaValue = document.getElementById('slider-delta-value');
+    const btnCalibrate = document.getElementById('btn-calibrate');
+    const btnCalibrateLabel = document.getElementById('btn-calibrate-label');
+    const calibrationContainer = document.getElementById('calibration-progress-container');
+    const calibrationBar = document.getElementById('calibration-progress-bar');
+    const calibrationPercent = document.getElementById('calibration-percent');
+    const sectionCalibration = document.getElementById('section-calibration');
+    const btnStartMonitoring = document.getElementById('btn-start-monitoring');
+    const activeControls = document.getElementById('active-controls');
+    const btnPauseMonitoring = document.getElementById('btn-pause-monitoring');
+    const btnPauseLabel = document.getElementById('btn-pause-label');
+    const btnStopMonitoring = document.getElementById('btn-stop-monitoring');
+    const toggleMicMode = document.getElementById('toggle-mic-mode');
+    const micModeLabel = document.getElementById('mic-mode-label');
+
+    // Navigation elements
+    const screenDashboard = document.getElementById('screen-dashboard');
+    const screenHistory = document.getElementById('screen-history');
+    const btnGotoHistory = document.getElementById('btn-goto-history');
+    const btnBackFromHistory = document.getElementById('btn-back-from-history');
+    const sessionsView = document.getElementById('sessions-view');
+    const clipsView = document.getElementById('clips-view');
+    const historyScreenTitle = document.getElementById('history-screen-title');
+    const clipsList = document.getElementById('clips-list');
+    const clipsSessionDate = document.getElementById('clips-session-date');
+    const clipsSessionSummary = document.getElementById('clips-session-summary');
+
+    // Player Bottom Sheet
+    const playerSheet = document.getElementById('player-sheet');
+    const sheetContent = document.getElementById('sheet-content');
+    const btnCloseSheet = document.getElementById('btn-close-sheet');
+    const sheetClipTitle = document.getElementById('sheet-clip-title');
+    const sheetClipTime = document.getElementById('sheet-clip-time');
+    const sheetClipPeak = document.getElementById('sheet-clip-peak');
+    const waveformContainer = document.getElementById('waveform-container');
+    const sheetProgressSlider = document.getElementById('sheet-progress-slider');
+    const sheetTimeCurrent = document.getElementById('sheet-time-current');
+    const sheetTimeTotal = document.getElementById('sheet-time-total');
+    const btnPlayerPlaypause = document.getElementById('btn-player-playpause');
+    const iconPlay = document.getElementById('icon-play');
+    const iconPause = document.getElementById('icon-pause');
+    const btnSpeedToggle = document.getElementById('btn-speed-toggle');
+    const clockDisplay = document.getElementById('clock-display');
+
+    // Live clock update
+    function updateClock() {
+      const now = new Date();
+      const hrs = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      clockDisplay.textContent = `${hrs}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ==============================================
+    // CANVAS OLED DECIBEL GAUGE RENDERER
+    // ==============================================
+    let currentAnimatedDb = 38.0;
+
+    function renderGauge() {
+      // Smooth interpolation
+      currentAnimatedDb += (AppState.currentDb - currentAnimatedDb) * 0.25;
+
+      const triggerThreshold = AppState.baselineDb + AppState.thresholdDelta;
+      const width = canvas.width;
+      const height = canvas.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = 95;
+      const strokeWidth = 14;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Total sweep: 270 degrees, from 135 deg (bottom-left) to 405 deg (bottom-right)
+      const startAngleRad = (135 * Math.PI) / 180;
+      const sweepAngleRad = (270 * Math.PI) / 180;
+      const endAngleRad = startAngleRad + sweepAngleRad;
+
+      // 1. Inactive Background Track (Dark Slate Navy)
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, startAngleRad, endAngleRad, false);
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeStyle = '#1E2030';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // 2. Active Level Arc
+      const clampedDb = Math.min(Math.max(currentAnimatedDb, 0), 100);
+      const activeAngleRad = startAngleRad + (clampedDb / 100) * sweepAngleRad;
+
+      let ringColor = '#00E676'; // Safe Green
+      if (AppState.isMonitoring && !AppState.isPaused) {
+        if (clampedDb >= triggerThreshold) {
+          ringColor = '#FF5252'; // Red Recording / Trigger
+        } else if (clampedDb >= triggerThreshold - 5) {
+          ringColor = '#FFB300'; // Amber Warning
+        } else if (clampedDb > AppState.baselineDb + 4) {
+          ringColor = '#00E5FF'; // Cyan Listening
+        }
+      }
+
+      if (clampedDb > 0.5) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngleRad, activeAngleRad, false);
+        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = ringColor;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+
+      // 3. Threshold Tick Marker on the Gauge
+      const thresholdAngleRad = startAngleRad + (Math.min(triggerThreshold, 100) / 100) * sweepAngleRad;
+      const tickInnerRadius = radius - strokeWidth / 2 - 4;
+      const tickOuterRadius = radius + strokeWidth / 2 + 6;
+
+      const tickStartX = centerX + Math.cos(thresholdAngleRad) * tickInnerRadius;
+      const tickStartY = centerY + Math.sin(thresholdAngleRad) * tickInnerRadius;
+      const tickEndX = centerX + Math.cos(thresholdAngleRad) * tickOuterRadius;
+      const tickEndY = centerY + Math.sin(thresholdAngleRad) * tickOuterRadius;
+
+      ctx.beginPath();
+      ctx.moveTo(tickStartX, tickStartY);
+      ctx.lineTo(tickEndX, tickEndY);
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#FFB300'; // Amber marker
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // 4. Update UI numbers
+      displayDb.textContent = currentAnimatedDb.toFixed(1);
+
+      requestAnimationFrame(renderGauge);
+    }
+    requestAnimationFrame(renderGauge);
+
+    // ==============================================
+    // AUDIO MONITORING & SIMULATION ENGINE
+    // ==============================================
+    function updateMetricsUI() {
+      const triggerThreshold = AppState.baselineDb + AppState.thresholdDelta;
+      cardBaselineDb.textContent = `${Math.round(AppState.baselineDb)} dB`;
+      cardThresholdDb.textContent = `${Math.round(triggerThreshold)} dB`;
+      cardThresholdDelta.textContent = `+${Math.round(AppState.thresholdDelta)} dB`;
+      sliderDeltaValue.textContent = `+${Math.round(AppState.thresholdDelta)} dB`;
+      cardClipsCount.textContent = AppState.sessionClipsCount;
+      cardClipsPeak.textContent = AppState.lastPeakDb ? `Pico: ${AppState.lastPeakDb.toFixed(0)} dB` : `${AppState.sessionClipsCount} grabados`;
+
+      if (AppState.sessionClipsCount > 0) {
+        cardClipsCount.className = "text-xl font-bold text-cyanAccent font-mono-num";
+      } else {
+        cardClipsCount.className = "text-xl font-bold text-greenSafe font-mono-num";
+      }
+
+      // Status badge update
+      if (!AppState.isMonitoring) {
+        statusBadge.textContent = "INACTIVO";
+        statusBadge.className = "mt-2 text-xs font-bold uppercase tracking-widest text-[#8C65FF] px-2 py-0.5 rounded-full";
+      } else if (AppState.isPaused) {
+        statusBadge.textContent = "PAUSADO";
+        statusBadge.className = "mt-2 text-xs font-bold uppercase tracking-widest text-amberWarning px-2 py-0.5 rounded-full";
+      } else {
+        const trigger = AppState.baselineDb + AppState.thresholdDelta;
+        if (AppState.currentDb >= trigger) {
+          statusBadge.textContent = "● GRABANDO";
+          statusBadge.className = "mt-2 text-xs font-bold uppercase tracking-widest text-redRecording px-2 py-0.5 rounded-full pulse-glow";
+        } else {
+          statusBadge.textContent = "ESCUCHANDO";
+          statusBadge.className = "mt-2 text-xs font-bold uppercase tracking-widest text-cyanAccent px-2 py-0.5 rounded-full";
+        }
+      }
+    }
+
+    // Realistic Sound Simulation Loop
+    let simSpikeCountdown = 0;
+    function runSimulationStep() {
+      if (!AppState.isMonitoring || AppState.isPaused) {
+        if (!AppState.isMonitoring) {
+          AppState.currentDb = AppState.baselineDb;
+        }
+        updateMetricsUI();
+        return;
+      }
+
+      // Base jitter
+      let targetDb = AppState.baselineDb + (Math.random() * 4 - 2);
+
+      // Periodically simulate a snore or nocturnal noise spike
+      simSpikeCountdown++;
+      if (simSpikeCountdown > 35) { // every ~5-8 seconds
+        if (Math.random() > 0.4) {
+          const spikeAmount = AppState.thresholdDelta + 6 + Math.random() * 14;
+          targetDb = AppState.baselineDb + spikeAmount;
+          triggerAudioEvent(targetDb);
+        }
+        simSpikeCountdown = 0;
+      }
+
+      AppState.currentDb = targetDb;
+      updateMetricsUI();
+    }
+
+    function triggerAudioEvent(peakDb) {
+      AppState.sessionClipsCount++;
+      AppState.lastPeakDb = Math.max(AppState.lastPeakDb || 0, peakDb);
+
+      // Add to session clips
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      const newClip = {
+        id: Date.now(),
+        title: peakDb > 65 ? 'Ronquido Fuerte' : (peakDb > 55 ? 'Respiración / Movimiento' : 'Sonido Nocturno'),
+        time: `${timeStr} AM`,
+        peakDb: Math.round(peakDb * 10) / 10,
+        durationSec: (3.0 + Math.random() * 4).toFixed(1)
+      };
+
+      if (AppState.sessions.length > 0) {
+        AppState.sessions[0].clips.unshift(newClip);
+        AppState.sessions[0].clipsCount = AppState.sessions[0].clips.length;
+      }
+      renderSessionsList();
+    }
+
+    // Real Mic support via Web Audio API
+    async function startRealMic() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        micStream = stream;
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        analyserNode = audioContext.createAnalyser();
+        analyserNode.fftSize = 256;
+        source.connect(analyserNode);
+
+        const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+        function processMic() {
+          if (!AppState.useRealMic) return;
+          analyserNode.getByteTimeDomainData(dataArray);
+
+          // Calculate RMS
+          let sumSquares = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            const norm = (dataArray[i] - 128) / 128;
+            sumSquares += norm * norm;
+          }
+          const rms = Math.sqrt(sumSquares / dataArray.length);
+          // Convert to pseudo-dB SPL
+          const db = Math.max(30, 20 * Math.log10(rms + 0.0001) + 85);
+          
+          if (AppState.isMonitoring && !AppState.isPaused) {
+            AppState.currentDb = db;
+            if (db >= AppState.baselineDb + AppState.thresholdDelta) {
+              triggerAudioEvent(db);
+            }
+          }
+          updateMetricsUI();
+          requestAnimationFrame(processMic);
+        }
+        processMic();
+      } catch (err) {
+        alert("No se pudo acceder al micrófono: " + err.message + ". Continuando en modo Simulación.");
+        AppState.useRealMic = false;
+        micModeLabel.textContent = "Simulador";
+      }
+    }
+
+    // Threshold Slider
+    sliderThreshold.addEventListener('input', (e) => {
+      AppState.thresholdDelta = parseFloat(e.target.value);
+      updateMetricsUI();
+    });
+
+    // Calibration Process
+    btnCalibrate.addEventListener('click', () => {
+      if (AppState.isCalibrating || AppState.isMonitoring) return;
+      AppState.isCalibrating = true;
+      calibrationContainer.classList.remove('hidden');
+      btnCalibrate.classList.add('opacity-50', 'pointer-events-none');
+
+      let progress = 0;
+      let samples = [];
+      const interval = setInterval(() => {
+        progress += 4;
+        AppState.calibrationProgress = progress;
+        calibrationBar.style.width = `${progress}%`;
+        calibrationPercent.textContent = `${progress}%`;
+
+        // Measure ambient level
+        const sample = 34 + Math.random() * 6;
+        samples.push(sample);
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          AppState.isCalibrating = false;
+          calibrationContainer.classList.add('hidden');
+          btnCalibrate.classList.remove('opacity-50', 'pointer-events-none');
+          
+          // Average baseline
+          const avg = samples.reduce((a, b) => a + b, 0) / samples.length;
+          AppState.baselineDb = Math.round(avg);
+          AppState.currentDb = AppState.baselineDb;
+          updateMetricsUI();
+        }
+      }, 120);
+    });
+
+    // Start / Pause / Stop Monitoring Handlers
+    btnStartMonitoring.addEventListener('click', () => {
+      AppState.isMonitoring = true;
+      AppState.isPaused = false;
+      btnStartMonitoring.classList.add('hidden');
+      activeControls.classList.remove('hidden');
+      activeControls.classList.add('grid');
+      sectionCalibration.classList.add('opacity-40', 'pointer-events-none');
+
+      if (AppState.useRealMic && !micStream) {
+        startRealMic();
+      }
+
+      if (!simInterval) {
+        simInterval = setInterval(runSimulationStep, 200);
+      }
+      updateMetricsUI();
+    });
+
+    btnPauseMonitoring.addEventListener('click', () => {
+      AppState.isPaused = !AppState.isPaused;
+      if (AppState.isPaused) {
+        btnPauseLabel.textContent = "Reanudar";
+      } else {
+        btnPauseLabel.textContent = "Pausar";
+      }
+      updateMetricsUI();
+    });
+
+    btnStopMonitoring.addEventListener('click', () => {
+      AppState.isMonitoring = false;
+      AppState.isPaused = false;
+      btnStartMonitoring.classList.remove('hidden');
+      activeControls.classList.add('hidden');
+      activeControls.classList.remove('grid');
+      sectionCalibration.classList.remove('opacity-40', 'pointer-events-none');
+      btnPauseLabel.textContent = "Pausar";
+
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+      }
+      AppState.currentDb = AppState.baselineDb;
+      updateMetricsUI();
+    });
+
+    // Toggle Real Mic vs Simulation
+    toggleMicMode.addEventListener('click', () => {
+      AppState.useRealMic = !AppState.useRealMic;
+      if (AppState.useRealMic) {
+        micModeLabel.textContent = "Micrófono Real";
+        startRealMic();
+      } else {
+        micModeLabel.textContent = "Simulador";
+        if (micStream) {
+          micStream.getTracks().forEach(t => t.stop());
+          micStream = null;
+        }
+      }
+    });
+
+    // ==============================================
+    // NAVIGATION & SCREENS
+    // ==============================================
+    btnGotoHistory.addEventListener('click', () => {
+      screenDashboard.classList.add('hidden');
+      screenHistory.classList.remove('hidden');
+      showSessionsView();
+    });
+
+    btnBackFromHistory.addEventListener('click', () => {
+      if (AppState.selectedSessionId !== null) {
+        showSessionsView();
+      } else {
+        screenHistory.classList.add('hidden');
+        screenDashboard.classList.remove('hidden');
+      }
+    });
+
+    function showSessionsView() {
+      AppState.selectedSessionId = null;
+      historyScreenTitle.textContent = "Historial de Noches";
+      sessionsView.classList.remove('hidden');
+      clipsView.classList.add('hidden');
+      renderSessionsList();
+    }
+
+    function showClipsView(session) {
+      AppState.selectedSessionId = session.id;
+      historyScreenTitle.textContent = "Clips de la Noche";
+      sessionsView.classList.add('hidden');
+      clipsView.classList.remove('hidden');
+      clipsSessionDate.textContent = session.dateFormatted;
+      clipsSessionSummary.textContent = `${session.clips.length} grabaciones • Pico: ${Math.max(...session.clips.map(c => c.peakDb))} dB`;
+
+      clipsList.innerHTML = '';
+      session.clips.forEach(clip => {
+        const card = document.createElement('div');
+        card.className = "p-3.5 bg-darkSurface border border-darkCardBorder rounded-2xl flex items-center justify-between hover:border-purplePrimary/50 cursor-pointer active:scale-98 transition";
+        card.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-darkSurfaceVariant border border-darkCardBorder flex items-center justify-center text-cyanAccent">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-textPrimary leading-none">${clip.title}</h4>
+              <p class="text-xs text-textSecondary mt-1">${clip.time} • ${clip.durationSec}s</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold text-amberWarning font-mono-num">${clip.peakDb} dB</span>
+            <svg class="w-4 h-4 text-textTertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        `;
+        card.addEventListener('click', () => openClipPlayer(clip));
+        clipsList.appendChild(card);
+      });
+    }
+
+    function renderSessionsList() {
+      sessionsView.innerHTML = '';
+      AppState.sessions.forEach(session => {
+        const card = document.createElement('div');
+        card.className = "p-4 bg-darkSurface border border-darkCardBorder rounded-2xl hover:border-purplePrimary/40 transition cursor-pointer active:scale-98";
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="text-base font-bold text-textPrimary">${session.dateFormatted}</h3>
+              <p class="text-xs text-textSecondary mt-0.5">${session.timeRange} (${session.duration})</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-darkSurfaceVariant border border-darkCardBorder text-textSecondary">
+                ${session.clips.length} clips
+              </span>
+              <button class="p-1 text-textTertiary hover:text-redRecording delete-session-btn" title="Eliminar noche">
+                <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center space-x-3 text-xs text-textTertiary border-t border-darkCardBorder/60 pt-2">
+            <span>Base: <strong class="text-textSecondary">${session.baselineDb} dB</strong></span>
+            <span>•</span>
+            <span>Umbral: <strong class="text-cyanAccent">${session.thresholdDb} dB</strong></span>
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.delete-session-btn')) {
+            e.stopPropagation();
+            AppState.sessions = AppState.sessions.filter(s => s.id !== session.id);
+            renderSessionsList();
+            return;
+          }
+          showClipsView(session);
+        });
+
+        sessionsView.appendChild(card);
+      });
+    }
+
+    // ==============================================
+    // CLIP PLAYER BOTTOM SHEET
+    // ==============================================
+    let activeClip = null;
+    let isPlayingClip = false;
+    let clipPlayProgress = 0;
+    let playerInterval = null;
+    let playbackSpeed = 1.0;
+
+    function openClipPlayer(clip) {
+      activeClip = clip;
+      sheetClipTitle.textContent = clip.title;
+      sheetClipTime.textContent = `${clip.time} • Duración: ${clip.durationSec}s`;
+      sheetClipPeak.textContent = `${clip.peakDb} dB`;
+      sheetTimeTotal.textContent = `0:0${clip.durationSec}`;
+      sheetTimeCurrent.textContent = "0:00.0";
+      sheetProgressSlider.value = 0;
+      clipPlayProgress = 0;
+      isPlayingClip = false;
+      updatePlayPauseButton();
+
+      // Build 40 pseudo-waveform bars
+      waveformContainer.innerHTML = '';
+      for (let i = 0; i < 40; i++) {
+        const bar = document.createElement('div');
+        const heightPct = Math.min(100, Math.max(15, Math.floor(Math.sin(i * 0.3) * 35 + 50 + (Math.random() * 30))));
+        bar.className = "flex-1 bg-darkCardBorder rounded-full transition-colors duration-100 bar-item";
+        bar.style.height = `${heightPct}%`;
+        waveformContainer.appendChild(bar);
+      }
+
+      playerSheet.classList.remove('hidden');
+      setTimeout(() => {
+        sheetContent.classList.remove('translate-y-full');
+      }, 10);
+    }
+
+    function closeClipPlayer() {
+      if (playerInterval) {
+        clearInterval(playerInterval);
+        playerInterval = null;
+      }
+      isPlayingClip = false;
+      sheetContent.classList.add('translate-y-full');
+      setTimeout(() => {
+        playerSheet.classList.add('hidden');
+      }, 300);
+    }
+
+    btnCloseSheet.addEventListener('click', closeClipPlayer);
+
+    function updatePlayPauseButton() {
+      if (isPlayingClip) {
+        iconPlay.classList.add('hidden');
+        iconPause.classList.remove('hidden');
+      } else {
+        iconPlay.classList.remove('hidden');
+        iconPause.classList.add('hidden');
+      }
+    }
+
+    btnPlayerPlaypause.addEventListener('click', () => {
+      if (!activeClip) return;
+      isPlayingClip = !isPlayingClip;
+      updatePlayPauseButton();
+
+      if (isPlayingClip) {
+        const durationSec = parseFloat(activeClip.durationSec);
+        const stepMs = 50;
+        playerInterval = setInterval(() => {
+          clipPlayProgress += (stepMs / 1000) * playbackSpeed;
+          const pct = Math.min(100, (clipPlayProgress / durationSec) * 100);
+          sheetProgressSlider.value = pct;
+
+          const currentSec = clipPlayProgress.toFixed(1);
+          sheetTimeCurrent.textContent = `0:0${currentSec}`;
+
+          // Highlight bars
+          const bars = waveformContainer.querySelectorAll('.bar-item');
+          const activeIndex = Math.floor((pct / 100) * bars.length);
+          bars.forEach((b, idx) => {
+            if (idx <= activeIndex) {
+              b.style.backgroundColor = '#00E5FF';
+            } else {
+              b.style.backgroundColor = '#262838';
+            }
+          });
+
+          if (clipPlayProgress >= durationSec) {
+            clearInterval(playerInterval);
+            isPlayingClip = false;
+            clipPlayProgress = 0;
+            updatePlayPauseButton();
+          }
+        }, stepMs);
+      } else {
+        if (playerInterval) {
+          clearInterval(playerInterval);
+          playerInterval = null;
+        }
+      }
+    });
+
+    btnSpeedToggle.addEventListener('click', () => {
+      if (playbackSpeed === 1.0) playbackSpeed = 1.5;
+      else if (playbackSpeed === 1.5) playbackSpeed = 2.0;
+      else playbackSpeed = 1.0;
+      btnSpeedToggle.textContent = `${playbackSpeed.toFixed(1)}x`;
+    });
+
+    // Reset demo
+    document.getElementById('reset-data-btn').addEventListener('click', () => {
+      AppState.sessionClipsCount = 0;
+      AppState.lastPeakDb = null;
+      AppState.baselineDb = 38.0;
+      AppState.thresholdDelta = 12.0;
+      sliderThreshold.value = 12;
+      updateMetricsUI();
+    });
+
+    // Initial render
+    updateMetricsUI();
+    renderSessionsList();
+  </script>
+</body>
+</html>

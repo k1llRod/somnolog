@@ -1,0 +1,18 @@
+R_DEF: Internal format may change without notice
+local
+color background_oled
+color black
+color primary_night
+color white
+drawable ic_launcher
+drawable ic_notification
+string action_pause
+string action_resume
+string action_stop
+string app_name
+string notification_channel_description
+string notification_channel_name
+string service_monitoring_text
+string service_monitoring_title
+string service_recording_text
+style Theme.SomnoLog
