@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.somnolog.CalculateRmsUseCaseTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T13:55:04.796Z" hostname="PC-WORK" time="0.006">
+<testsuite name="com.antigravity.somnolog.CalculateRmsUseCaseTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-14T03:26:51.610Z" hostname="K1LLROD" time="0.006">
   <properties/>
   <testcase name="audio level invoke returns consistent structure" classname="com.antigravity.somnolog.CalculateRmsUseCaseTest" time="0.002"/>
   <testcase name="rms of silence is zero" classname="com.antigravity.somnolog.CalculateRmsUseCaseTest" time="0.0"/>
-  <testcase name="normalized decibel calculation maps silence to lower bound and peaks to upper bound" classname="com.antigravity.somnolog.CalculateRmsUseCaseTest" time="0.0"/>
+  <testcase name="normalized decibel calculation maps silence to lower bound and peaks to upper bound" classname="com.antigravity.somnolog.CalculateRmsUseCaseTest" time="0.001"/>
   <testcase name="rms of maximum amplitude is max pcm value" classname="com.antigravity.somnolog.CalculateRmsUseCaseTest" time="0.0"/>
-  <testcase name="rms of alternating square wave is equal to amplitude" classname="com.antigravity.somnolog.CalculateRmsUseCaseTest" time="0.001"/>
+  <testcase name="rms of alternating square wave is equal to amplitude" classname="com.antigravity.somnolog.CalculateRmsUseCaseTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

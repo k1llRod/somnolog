@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.somnolog.SaveClipUseCaseTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T13:55:04.649Z" hostname="PC-WORK" time="0.139">
+<testsuite name="com.antigravity.somnolog.SaveClipUseCaseTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-14T03:26:51.630Z" hostname="K1LLROD" time="0.042">
   <properties/>
-  <testcase name="clip with 800ms or longer is saved and retained" classname="com.antigravity.somnolog.SaveClipUseCaseTest" time="0.116"/>
-  <testcase name="clip duration is capped at 60 seconds max" classname="com.antigravity.somnolog.SaveClipUseCaseTest" time="0.003"/>
-  <testcase name="clip shorter than 800ms is discarded and file is deleted" classname="com.antigravity.somnolog.SaveClipUseCaseTest" time="0.005"/>
+  <testcase name="clip with 800ms or longer is saved and retained" classname="com.antigravity.somnolog.SaveClipUseCaseTest" time="0.037"/>
+  <testcase name="clip duration is capped at 60 seconds max" classname="com.antigravity.somnolog.SaveClipUseCaseTest" time="0.002"/>
+  <testcase name="clip shorter than 800ms is discarded and file is deleted" classname="com.antigravity.somnolog.SaveClipUseCaseTest" time="0.003"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

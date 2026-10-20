@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.somnolog.CircularAudioBufferTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-14T03:26:52.964Z" hostname="K1LLROD" time="0.009">
+  <properties/>
+  <testcase name="buffer stores samples without wrapping when under capacity" classname="com.antigravity.somnolog.CircularAudioBufferTest" time="0.002"/>
+  <testcase name="clear resets the buffer state" classname="com.antigravity.somnolog.CircularAudioBufferTest" time="0.006"/>
+  <testcase name="buffer wraps around and maintains chronological order" classname="com.antigravity.somnolog.CircularAudioBufferTest" time="0.001"/>
+  <testcase name="buffer correctly overwrites multiple full loops" classname="com.antigravity.somnolog.CircularAudioBufferTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
